@@ -2,10 +2,15 @@
  * DCT-RAG / Hexa Assist — embeddable chatbot widget
  * Drop-in: <script src=".../widget.js"
  *            data-api-url="https://api.example.com"
- *            data-trial-id="solaris-1"
+ *            data-trial-id="e593c748-14c6-4021-bf17-32e30e1c4545"
+ *            data-trial-name="Healwell"
  *            data-user-name="Sarah"></script>
  *
- * No dependencies. Self-contained CSS. ~600 lines.
+ * data-trial-id is the LMS trial UUID — sent verbatim in the Trial header
+ * on every backend call. data-trial-name is the friendly study name shown
+ * in chat copy ("the Healwell study"). Both per-page customisable.
+ *
+ * No dependencies. Self-contained CSS.
  */
 (function () {
   "use strict";
@@ -37,6 +42,7 @@
   var config = {
     apiUrl: (attr("data-api-url", "") || "").replace(/\/+$/, ""),
     trialId: attr("data-trial-id", ""),
+    trialName: attr("data-trial-name", ""),
     userName: attr("data-user-name", ""),
     title: attr("data-title", "Hexa Assist"),
     subtitle: attr(
@@ -62,6 +68,7 @@
     var w = window.HexaAssistConfig;
     if (w.apiUrl) config.apiUrl = String(w.apiUrl).replace(/\/+$/, "");
     if (w.trialId) config.trialId = w.trialId;
+    if (w.trialName) config.trialName = w.trialName;
     if (w.userName) config.userName = w.userName;
     if (w.title) config.title = w.title;
     if (w.subtitle) config.subtitle = w.subtitle;
@@ -506,6 +513,7 @@
   function postChat(message) {
     var body = {
       trial_id: config.trialId,
+      trial_name: config.trialName || null,
       session_id: state.sessionId || null,
       message: message || null,
       user_name: config.userName || null,
