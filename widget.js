@@ -2,13 +2,21 @@
  * DCT-RAG / Hexa Assist — embeddable chatbot widget
  * Drop-in: <script src=".../widget.js"
  *            data-api-url="https://api.example.com"
- *            data-trial-id="e593c748-14c6-4021-bf17-32e30e1c4545"
+ *            data-trial-id="healwell"
+ *            data-lms-trial-id="e593c748-14c6-4021-bf17-32e30e1c4545"
  *            data-trial-name="Healwell"
  *            data-user-name="Sarah"></script>
  *
- * data-trial-id is the LMS trial UUID — sent verbatim in the Trial header
- * on every backend call. data-trial-name is the friendly study name shown
- * in chat copy ("the Healwell study"). Both per-page customisable.
+ * Two ids per trial — both supplied here:
+ *   data-trial-id      — local id (slug). Used by the backend to key
+ *                        sessions, scope RAG retrieval, and look up the
+ *                        local document folder.
+ *   data-lms-trial-id  — LMS UUID. Sent verbatim in the `Trial` header
+ *                        on every LMS API call (create-lead, screening
+ *                        submissions, fetch-questions). Optional; if
+ *                        absent the backend falls back to data-trial-id.
+ *   data-trial-name    — friendly study name shown in chat copy
+ *                        ("the Healwell study").
  *
  * No dependencies. Self-contained CSS.
  */
@@ -42,6 +50,7 @@
   var config = {
     apiUrl: (attr("data-api-url", "") || "").replace(/\/+$/, ""),
     trialId: attr("data-trial-id", ""),
+    lmsTrialId: attr("data-lms-trial-id", ""),
     trialName: attr("data-trial-name", ""),
     userName: attr("data-user-name", ""),
     title: attr("data-title", "Hexa Assist"),
@@ -68,6 +77,7 @@
     var w = window.HexaAssistConfig;
     if (w.apiUrl) config.apiUrl = String(w.apiUrl).replace(/\/+$/, "");
     if (w.trialId) config.trialId = w.trialId;
+    if (w.lmsTrialId) config.lmsTrialId = w.lmsTrialId;
     if (w.trialName) config.trialName = w.trialName;
     if (w.userName) config.userName = w.userName;
     if (w.title) config.title = w.title;
@@ -513,6 +523,7 @@
   function postChat(message) {
     var body = {
       trial_id: config.trialId,
+      lms_trial_id: config.lmsTrialId || null,
       trial_name: config.trialName || null,
       session_id: state.sessionId || null,
       message: message || null,
